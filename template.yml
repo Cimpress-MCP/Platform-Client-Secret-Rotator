@@ -1,0 +1,72 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+
+Transform: AWS::Serverless-2016-10-31
+
+Description: An Auth0 client secret rotator for the Cimpress Mass Customization Platform.
+
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: platform-client-secret-rotator
+    Description: A Secrets Manager rotation Lambda Function which can rotate the client secret for clients on the Cimpress Mass Customization Platform.
+    Author: Christopher Osborn
+    SpdxLicenseId: Apache-2.0
+    LicenseUrl: ./LICENSE
+    ReadMeUrl: ./README.md
+    Labels:
+    - auth0
+    - cimpress
+    - authentication
+    - lambda
+    - secrets manager
+    - rotate
+    - rotation
+    - rotator
+    - client secret
+    HomePageUrl: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator
+    SemanticVersion: 0.0.1
+    SourceCodeUrl: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator
+
+Parameters:
+  Audience:
+    Description: The audience which this client is a member of, authenticationally.
+    Type: String
+    Default: https://api.cimpress.io/
+  Authority:
+    Description: The source of tokens and the issuer of claims.
+    Type: String
+    Default: https://cimpress.auth0.com/
+    AllowedPattern: ^https:\/\/.+
+    ConstraintDescription: Authority must be an HTTPS URL.
+  Endpoint:
+    Type: String
+    Description: The Secrets Manager endpoint to hit.
+  FunctionName:
+    Type: String
+    Description: The name of the Lambda Function.
+
+Resources:
+  SecretsManagerAuth0ClientSecretRotation:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Ref FunctionName
+      Description: Conducts an AWS Secrets Manager rotation for Auth0 Client Secret
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.7
+      CodeUri: .
+      Timeout: 30
+      Policies:
+      - AWSSecretsManagerRotationPolicy:
+          FunctionName: !Ref FunctionName
+      Environment:
+        Variables:
+          AUDIENCE: !Ref Audience
+          AUTHORITY: !Ref Authority
+          SECRETS_MANAGER_ENDPOINT: !Ref Endpoint
+      Tags:
+        SecretsManagerLambda: Rotation
+
+Outputs:
+  RotationLambdaARN:
+    Description: The ARN of the rotation lambda
+    Value: !GetAtt SecretsManagerAuth0ClientSecretRotation.Arn

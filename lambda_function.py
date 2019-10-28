@@ -260,7 +260,7 @@ def set_client_secret(secret_dict, access_token):
     'Content-Type': 'application/json'
   }
   # todo(cosborn) It would be ideal to use the Management API, but I can't get that audience via client_credentials.
-  url = urllib.parse.urljoin('https://auth0.cimpress.io/v1/clients', secret_dict['id'])
+  url = urllib.parse.urljoin('https://auth0.cimpress.io/v1/clients/', secret_dict['id'])
   response = requests.patch(url, headers=headers, json=payload)
   response.raise_for_status()
   pass

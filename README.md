@@ -16,7 +16,7 @@ Here's an example use, provided in AWS Cloudformation:
 
 ```yaml
 # snip
-SecretRotator:
+ExampleSecretRotator:
   Type: AWS::Serverless::Application
   Properties:
     Location:
@@ -25,16 +25,16 @@ SecretRotator:
     Parameters:
       Endpoint: !Sub https://secretsmanager.${AWS::Region}.${AWS::URLSuffix}
       FunctionName: secret-rotator
-SecretRotatorInvokePermission:
+ExampleSecretRotatorInvokePermission:
   Type: AWS::Lambda::Permission
   Properties:
-    FunctionName: !GetAtt SecretRotator.Outputs.RotationLambdaARN
+    FunctionName: !GetAtt ExampleSecretRotator.Outputs.RotationLambdaARN
     Action: lambda:InvokeFunction
     Principal: !Sub secretsmanager.${AWS::URLSuffix}
-Secret:
+ExampleSecret:
   Type: AWS::SecretsManager::Secret
   Properties:
-    Description: A test client ID and secret.
+    Description: An example client ID and secret.
     GenerateSecretString:
       SecretStringTemplate: |-
         { "id": "<<client_id>>" }
@@ -42,13 +42,13 @@ Secret:
       PasswordLength: 64
       ExcludeCharacters: |-
         !"#$%&'()*+,./:;<=>?@[\]^`{|}~
-SecretRotationSchedule:
+ExampleSecretRotationSchedule:
   Type: AWS::SecretsManager::RotationSchedule
   Properties:
-    RotationLambdaARN: !GetAtt SecretRotator.Outputs.RotationLambdaARN
+    RotationLambdaARN: !GetAtt ExampleSecretRotator.Outputs.RotationLambdaARN
     RotationRules:
       AutomaticallyAfterDays: 30
-    SecretId: !Ref Secret
+    SecretId: !Ref ExampleSecret
 # snip
 ```
 

@@ -15,7 +15,41 @@ For good security hygiene, secret values should be rotated regularly. But _it's 
 Here's an example use, provided in AWS Cloudformation:
 
 ```yaml
-# TODO
+# snip
+SecretRotator:
+  Type: AWS::Serverless::Application
+  Properties:
+    Location:
+      ApplicationId: arn:aws:serverlessrepo:us-east-1:820870426321:applications/platform-client-secret-rotator
+      SemanticVersion: 1.0.0
+    Parameters:
+      Endpoint: !Sub https://secretsmanager.${AWS::Region}.${AWS::URLSuffix}
+      FunctionName: secret-rotator
+SecretRotatorInvokePermission:
+  Type: AWS::Lambda::Permission
+  Properties:
+    FunctionName: !GetAtt SecretRotator.Outputs.RotationLambdaARN
+    Action: lambda:InvokeFunction
+    Principal: !Sub secretsmanager.${AWS::URLSuffix}
+Secret:
+  Type: AWS::SecretsManager::Secret
+  Properties:
+    Description: A test client ID and secret.
+    GenerateSecretString:
+      SecretStringTemplate: |-
+        { "id": "<<client_id>>" }
+      GenerateStringKey: secret
+      PasswordLength: 64
+      ExcludeCharacters: |-
+        !"#$%&'()*+,./:;<=>?@[\]^`{|}~
+SecretRotationSchedule:
+  Type: AWS::SecretsManager::RotationSchedule
+  Properties:
+    RotationLambdaARN: !GetAtt SecretRotator.Outputs.RotationLambdaARN
+    RotationRules:
+      AutomaticallyAfterDays: 30
+    SecretId: !Ref Secret
+# snip
 ```
 
 ## Helpful Links

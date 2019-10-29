@@ -1,0 +1,4 @@
+*                         text=auto eol=lf
+.gitattributes            eol=lf
+.gitignore                eol=lf
+*.py                      diff=python

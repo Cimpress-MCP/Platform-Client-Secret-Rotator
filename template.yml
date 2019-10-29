@@ -8,7 +8,9 @@ Description: An Auth0 client secret rotator for the Cimpress Mass Customization 
 Metadata:
   AWS::ServerlessRepo::Application:
     Name: platform-client-secret-rotator
-    Description: A Secrets Manager rotation Lambda Function which can rotate the client secret for clients on the Cimpress Mass Customization Platform.
+    Description: >-
+      A Secrets Manager rotation Lambda Function which can rotate the client secret
+      for clients on the Cimpress Mass Customization Platform.
     Author: Christopher Osborn
     SpdxLicenseId: Apache-2.0
     LicenseUrl: ./LICENSE

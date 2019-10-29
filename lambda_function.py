@@ -28,9 +28,9 @@ def lambda_handler(event, context):
       - SecretId: The secret ARN or identifier
       - ClientRequestToken: The ClientRequestToken of the secret version
       - Step: The rotation step (one of "createSecret", "setSecret", "testSecret", or "finishSecret")
-    
+
     context: (LambdaContext): The Lambda runtime information
-  
+
   Raises:
     ResourceNotFoundException: If the secret with the specified ARN and stage does not exist
 
@@ -93,7 +93,7 @@ def create_secret(service_client, arn, token):
     ValueError: if the current secret is not valid JSON
 
     KeyError: if the secret JSON does not contain the expected keys
-  
+
   """
   # Make sure the current secret exists
   current_dict = get_secret_dict(service_client, arn, 'AWSCURRENT')
@@ -106,7 +106,7 @@ def create_secret(service_client, arn, token):
     # Generate a random client secret (Seems to be [a-zA-Z0-9\-_].)
     client_secret = service_client.get_random_password(PasswordLength=64, ExcludeCharacters='!"#$%&\'()*+,./:;<=>?@[\\]^`{|}~')
     current_dict['secret'] = client_secret['RandomPassword']
-  
+
     # Put the secret
     service_client.put_secret_value(SecretId=arn, ClientRequestToken=token, SecretString=json.dumps(current_dict), VersionStages=['AWSPENDING'])
     logger.info(f'createSecret: Successfully put secret for ARN {arn} and version {token}.')
@@ -125,7 +125,7 @@ def set_secret(service_client, arn, token):
     arn (string): The secret ARN or other identifier
 
     token (string): The ClientRequestToken associated with the secret version
-  
+
   Raises:
     ResourceNotFoundException: If the secret with the specified ARN and stage does not exist
 
@@ -140,7 +140,7 @@ def set_secret(service_client, arn, token):
   if access_token:
     logger.info(f'set_secret: AWSPENDING secret is already set as client secret in Auth0 for secret {arn}.')
     return
-  
+
   # Now try the current password
   access_token = get_access_token(get_secret_dict(service_client, arn, 'AWSCURRENT'))
   if not access_token:
@@ -149,26 +149,26 @@ def set_secret(service_client, arn, token):
       access_token = get_access_token(get_secret_dict(service_client, arn, 'AWSPREVIOUS'))
     except service_client.exceptions.ResourceNotFoundException:
       access_token = None
-  
+
   # If we still don't have an access token, complain bitterly
   if not access_token:
     logger.error(f'set_secret: Unable to acquire access token with previous, current, or pending secret of secret arn {arn}!')
     raise ValueError(f'set_secret: Unable to acquire access token with previous, current, or pending secret of secret arn {arn}!')
-  
+
   # Now set the client secret to the pending client secret
   set_client_secret(pending_dict, access_token)
 
 
 def test_secret(service_client, arn, token):
   """Test the pending secret against Auth0
-  
+
   This method tries to acquire an access token with the secrets staged with AWSPENDING.
 
   Args:
       service_client (client): The secrets manager service client
 
       arn (string): The secret ARN or other identifier
-      
+
       token (string): The ClientRequestToken associated with the secret version
 
   Raises:
@@ -177,7 +177,7 @@ def test_secret(service_client, arn, token):
       ValueError: If the secret is not valid JSON or valid credentials are not found to acquire an access token
 
       KeyError: If the secret json does not contain the expected keys
-  
+
   """
   # Try to acquire an acccess token with the pending secret
   access_token = get_access_token(get_secret_dict(service_client, arn, 'AWSPENDING', token))
@@ -188,9 +188,9 @@ def test_secret(service_client, arn, token):
 
 def finish_secret(service_client, arn, token):
   """Finish the rotation by marking the pending secret as current
-  
+
   This method finishes the secret rotation by staging the secret staged AWSPENDING with the AWSCURRENT stage.
-  
+
   Args:
       service_client (client): The secrets manager service client
 
@@ -210,7 +210,7 @@ def finish_secret(service_client, arn, token):
             return
           current_version = version
           break
-  
+
   # Finalize by staging the secret version current
   service_client.update_secret_version_stage(SecretId=arn, VersionStage='AWSCURRENT', MoveToVersionId=token, RemoveFromVersionId=current_version)
   logger.info(f'finish_secret: Successfully set AWSCURRENT stage to version {token} for secret {arn}.')
@@ -227,7 +227,7 @@ def get_access_token(secret_dict):
 
   Returns:
     AccessToken: The access token value if successful, otherwise None.
-  
+
   Raises:
     KeyError: If the secret JSON does not contain the expected keys.
   """
@@ -249,7 +249,7 @@ def get_access_token(secret_dict):
 def set_client_secret(secret_dict, access_token):
   """Sets an Auth0 access token from a secret dictionary
 
-  This helper function sets the client secret 
+  This helper function sets the client secret
   """
   payload = {
     'client_secret': secret_dict['secret']
@@ -280,12 +280,12 @@ def get_secret_dict(service_client, arn, stage, token=None):
 
   Returns:
     SecretDictionary: Secret dictionary
-  
+
   Raises:
     ResourceNotFoundException: If the secret with the specified ARN and stage does not exist
 
     Value Error: If the secret is not valid JSON
-  
+
   """
   required_fields = ['id', 'secret']
 
@@ -301,5 +301,5 @@ def get_secret_dict(service_client, arn, stage, token=None):
   for field in required_fields:
     if field not in secret_dict:
       raise KeyError(f'{field} key is missing from secret JSON')
-  
+
   return secret_dict

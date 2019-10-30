@@ -10,7 +10,7 @@ import urllib.parse
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-def lambda_handler(event, context):
+def handle(event, context):
   """Secrets Manager Auth0 Client Credentials Rotator
 
   This handler uses the Auth0 facade to rotate a client's secret. This rotation scheme contacts

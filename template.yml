@@ -53,9 +53,9 @@ Resources:
     Properties:
       FunctionName: !Ref FunctionName
       Description: Conducts an AWS Secrets Manager rotation for Auth0 Client Secret
-      Handler: lambda_function.lambda_handler
+      Handler: rotator.handle
       Runtime: python3.7
-      CodeUri: .
+      CodeUri: ./rotator/
       Timeout: 30
       Policies:
       - AWSSecretsManagerRotationPolicy:

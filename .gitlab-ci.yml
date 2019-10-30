@@ -1,0 +1,53 @@
+image: lambci/lambda:build-python3.7
+
+stages:
+- test
+- build
+- package
+- deploy
+
+variables:
+  AWS_DEFAULT_OUTPUT: text
+  SAM_CLI_TELEMETRY: 0
+  SERVICE_NAME: platform-client-secret-rotator
+
+cache:
+  key: "$CI_PIPELINE_ID"
+
+test:
+  stage: test
+  before_script:
+  - pip install cfn-lint
+  script:
+  - sam validate
+  - cfn-lint --template ./template.yaml
+
+build:
+  stage: build
+  script:
+  - sam build
+  artifacts:
+    paths:
+    - ./aws-sam/
+
+package:
+  stage: package
+  before_script:
+  - export BUCKET="$(aws cloudformation list-exports --query "Exports[?Name=='DeploymentBucket'].Value")"
+  script:
+  - sam package
+    --s3-bucket "${BUCKET}"
+    --s3-prefix "${SERVICE_NAME}"
+    --output-template-file ./template.out.yml
+  artifacts:
+    paths:
+    - ./template.out.yml
+  only:
+  - master
+
+deploy:
+  stage: deploy
+  script:
+  - sam publish --template ./template.out.yml
+  only:
+  - master

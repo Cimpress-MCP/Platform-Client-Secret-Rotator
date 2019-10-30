@@ -41,7 +41,7 @@ ExampleSecret:
       GenerateStringKey: secret
       PasswordLength: 64
       ExcludeCharacters: |-
-        !"#$%&'()*+,./:;<=>?@[\]^`{|}~
+        !"#$%&'()*,/:;<>?@[\]^`{|}~
 ExampleSecretRotationSchedule:
   Type: AWS::SecretsManager::RotationSchedule
   Properties:

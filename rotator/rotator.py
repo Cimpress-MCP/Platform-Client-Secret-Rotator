@@ -10,6 +10,9 @@ import urllib.parse
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+# Auth0 Client Secrets may include "numbers, letters and _, -, +, =, . symbols"
+EXCLUDE_CHARACTERS = r'''!"#$%&'()*,/:;<>?@[\]^`{|}~'''
+
 def handle(event, context):
   """Secrets Manager Auth0 Client Credentials Rotator
 
@@ -104,7 +107,7 @@ def create_secret(service_client, arn, token):
     logger.info(f'create_secret: Successfully retrieved secret for {arn}.')
   except service_client.exceptions.ResourceNotFoundException:
     # Generate a random client secret (Seems to be [a-zA-Z0-9\-_].)
-    client_secret = service_client.get_random_password(PasswordLength=64, ExcludeCharacters='!"#$%&\'()*+,./:;<=>?@[\\]^`{|}~')
+    client_secret = service_client.get_random_password(PasswordLength=64, ExcludeCharacters=EXCLUDE_CHARACTERS)
     current_dict['secret'] = client_secret['RandomPassword']
 
     # Put the secret

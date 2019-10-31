@@ -10,11 +10,11 @@ import urllib.parse
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-# Auth0 Client Secrets may include "numbers, letters and _, -, +, =, . symbols"
+# Client Secrets may include "numbers, letters and _, -, +, =, . symbols"
 EXCLUDE_CHARACTERS = r'''!"#$%&'()*,/:;<>?@[\]^`{|}~'''
 
 def handle(event, context):
-  """Secrets Manager Auth0 Client Credentials Rotator
+  """Secrets Manager Client Secret Rotator
 
   This handler uses the Auth0 facade to rotate a client's secret. This rotation scheme contacts
   the Auth0 facade as the client itself and sets is own secret, immediately invalidating the
@@ -22,8 +22,8 @@ def handle(event, context):
 
   The Secret SecretString is expected to ba a JSON string with the following format:
   {
-    "id": <required, the Auth0 Client ID>,
-    "secret": <required, the Auth0 Client Secret>
+    "id": <required, the OAuth2 Client ID>,
+    "secret": <required, the OAuth2 Client Secret>
   }
 
   Args:
@@ -82,7 +82,7 @@ def handle(event, context):
 def create_secret(service_client, arn, token):
   """Generate a new secret
 
-  This method first cheks for the existence of a secret for the passed-in token. If one does not exist, it will generate a
+  This method first checks for the existence of a secret for the passed-in token. If one does not exist, it will generate a
   new secret and put is with the passed-in token.
 
   Args:
@@ -106,7 +106,7 @@ def create_secret(service_client, arn, token):
     get_secret_dict(service_client, arn, 'AWSPENDING', token)
     logger.info(f'create_secret: Successfully retrieved secret for {arn}.')
   except service_client.exceptions.ResourceNotFoundException:
-    # Generate a random client secret (Seems to be [a-zA-Z0-9\-_].)
+    # Generate a random client secret according to length recommendations and allowed character set
     client_secret = service_client.get_random_password(PasswordLength=64, ExcludeCharacters=EXCLUDE_CHARACTERS)
     current_dict['secret'] = client_secret['RandomPassword']
 
@@ -116,11 +116,11 @@ def create_secret(service_client, arn, token):
 
 
 def set_secret(service_client, arn, token):
-  """Set the pending secret in Auth0
+  """Set the pending secret as the client secret
 
   This method tries to create an access token with the AWSPENDING secret and returns on success. If that fails, it
-  tries to log in  with the AWSCURRENT and AWSPREVIOUS secrets. If either one succeeds, if sets the AWSPENDING secret
-  as the client secret in Auth0. Otherwise, it raises a ValueError.
+  tries again with the AWSCURRENT and AWSPREVIOUS secrets. If either one succeeds, it sets the AWSPENDING secret
+  as the client secret. Otherwise, it raises a ValueError.
 
   Args:
     service_client (client): The secrets manager service client
@@ -139,17 +139,17 @@ def set_secret(service_client, arn, token):
   """
   # First try to create an access token with the pending secret. If it succeeds, return
   pending_dict = get_secret_dict(service_client, arn, 'AWSPENDING', token)
-  access_token = get_access_token(pending_dict)
+  access_token = create_access_token(pending_dict)
   if access_token:
-    logger.info(f'set_secret: AWSPENDING secret is already set as client secret in Auth0 for secret {arn}.')
+    logger.info(f'set_secret: AWSPENDING secret is already set as client secret for secret {arn}.')
     return
 
   # Now try the current password
-  access_token = get_access_token(get_secret_dict(service_client, arn, 'AWSCURRENT'))
+  access_token = create_access_token(get_secret_dict(service_client, arn, 'AWSCURRENT'))
   if not access_token:
     # If both current and pending do not work, try previous
     try:
-      access_token = get_access_token(get_secret_dict(service_client, arn, 'AWSPREVIOUS'))
+      access_token = create_access_token(get_secret_dict(service_client, arn, 'AWSPREVIOUS'))
     except service_client.exceptions.ResourceNotFoundException:
       access_token = None
 
@@ -163,7 +163,7 @@ def set_secret(service_client, arn, token):
 
 
 def test_secret(service_client, arn, token):
-  """Test the pending secret against Auth0
+  """Test the pending secret by creating an access token
 
   This method tries to acquire an access token with the secrets staged with AWSPENDING.
 
@@ -183,7 +183,7 @@ def test_secret(service_client, arn, token):
 
   """
   # Try to acquire an acccess token with the pending secret
-  access_token = get_access_token(get_secret_dict(service_client, arn, 'AWSPENDING', token))
+  access_token = create_access_token(get_secret_dict(service_client, arn, 'AWSPENDING', token))
   if not access_token:
     logger.error(f'test_secret: Unable to acquire access token with pending secret of secret ARN {arn}.')
     raise ValueError(f'test_secret: Unable to acquire access token with pending secret of secret ARN {arn}.')
@@ -219,10 +219,10 @@ def finish_secret(service_client, arn, token):
   logger.info(f'finish_secret: Successfully set AWSCURRENT stage to version {token} for secret {arn}.')
 
 
-def get_access_token(secret_dict):
-  """Gets an Auth0 access token from a secret dictionary
+def create_access_token(secret_dict):
+  """Creates an access token from a secret dictionary
 
-  This helper function tries to retrieve an access token grabbing credential info
+  This helper function tries to create an access token grabbing credential info
   from the secret dictionary. If successful, it returns the access token, otherwise None.
 
   Args:
@@ -233,6 +233,8 @@ def get_access_token(secret_dict):
 
   Raises:
     KeyError: If the secret JSON does not contain the expected keys.
+
+    KeyError: If the configuration JSON does not contain the expected keys.
   """
   payload = {
     'client_id': secret_dict['id'],
@@ -244,13 +246,32 @@ def get_access_token(secret_dict):
     'Accept': 'application/json',
     'Content-Type': 'application/json'
   }
-  url = urllib.parse.urljoin(os.environ['AUTHORITY'], '/oauth/token')
-  response = requests.post(url, headers=headers, json=payload).json()
+
+  configuration = get_openid_configuration()
+  response = requests.post(configuration['token_endpoint'], headers=headers, json=payload).json()
   return response.get('access_token', None)
 
 
+def get_openid_configuration():
+  """Gets the OpenID configuration for an authority
+
+  This helper function retrieves the OpenID configuration from the well-known address.
+  This configuration includes the endpoint at which client_credentials flows can
+  be performed.
+
+  Returns:
+    Configuration: The OpenID configuration for the configured authority.
+  """
+  headers = {
+    'Accept': 'application/json'
+  }
+
+  url = urllib.parse.urljoin(os.environ['AUTHORITY'], '/.well-known/openid-configuration')
+  return requests.get(url, headers=headers).json()
+
+
 def set_client_secret(secret_dict, access_token):
-  """Sets an Auth0 access token from a secret dictionary
+  """Sets an client secret from a secret dictionary
 
   This helper function sets the client secret
   """
@@ -262,11 +283,13 @@ def set_client_secret(secret_dict, access_token):
     'Authorization': f'Bearer {access_token}',
     'Content-Type': 'application/json'
   }
-  # todo(cosborn) It would be ideal to use the Management API, but I can't get that audience via client_credentials.
+
+  # todo(cosborn)
+  # It would be ideal to use the Auth0 Management API, but they lack robust permissions --
+  # I'd be able to rotate anybody's secret.
   url = urllib.parse.urljoin('https://auth0.cimpress.io/v1/clients/', secret_dict['id'])
   response = requests.patch(url, headers=headers, json=payload)
   response.raise_for_status()
-  pass
 
 
 def get_secret_dict(service_client, arn, stage, token=None):

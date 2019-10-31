@@ -52,7 +52,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Ref FunctionName
-      Description: Conducts an AWS Secrets Manager rotation for Auth0 Client Secret
+      Description: Conducts an AWS Secrets Manager rotation for OAuth2 Client Secret
       Handler: rotator.handle
       Runtime: python3.7
       CodeUri: ./rotator/

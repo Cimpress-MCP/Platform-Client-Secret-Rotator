@@ -52,6 +52,12 @@ ExampleSecretRotationSchedule:
 # snip
 ```
 
+### Bootstrapping
+
+There is an unavoidable bootstrapping step when deploying the Platform Client Secret Rotator into a service for the first time. The deployment process has no way of knowing what a client's _current_ secret is (nor should it!), so the first rotation which occurs after deployment will necessarily fail. To take ownership of the rotation of a client secret, transfer the client secret value into AWS Secrets Manager (into the deployed secret, specifically -- see `ExampleSecret` above) and instruct AWS Secrets Manager to rotate the secret immediately. It's hands-off operation from then on out.
+
+<!-- It's possible to transfer the secret value earlier, catching the secret in the state between when it is deployed and the rotator is deployed, but why accumulate that much stress in your life? -->
+
 ## Helpful Links
 
 * [AWS Secrets Manager][]

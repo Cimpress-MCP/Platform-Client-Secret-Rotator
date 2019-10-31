@@ -112,7 +112,7 @@ def create_secret(service_client, arn, token):
 
     # Put the secret
     service_client.put_secret_value(SecretId=arn, ClientRequestToken=token, SecretString=json.dumps(current_dict), VersionStages=['AWSPENDING'])
-    logger.info(f'createSecret: Successfully put secret for ARN {arn} and version {token}.')
+    logger.info(f'create_secret: Successfully put secret for ARN {arn} and version {token}.')
 
 
 def set_secret(service_client, arn, token):
@@ -235,6 +235,7 @@ def create_access_token(secret_dict):
     KeyError: If the secret JSON does not contain the expected keys.
 
     KeyError: If the configuration JSON does not contain the expected keys.
+
   """
   payload = {
     'client_id': secret_dict['id'],
@@ -261,6 +262,7 @@ def get_openid_configuration():
 
   Returns:
     Configuration: The OpenID configuration for the configured authority.
+
   """
   headers = {
     'Accept': 'application/json'
@@ -310,7 +312,7 @@ def get_secret_dict(service_client, arn, stage, token=None):
   Raises:
     ResourceNotFoundException: If the secret with the specified ARN and stage does not exist
 
-    Value Error: If the secret is not valid JSON
+    ValueError: If the secret is not valid JSON
 
   """
   required_fields = ['id', 'secret']

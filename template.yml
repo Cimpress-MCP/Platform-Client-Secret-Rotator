@@ -13,7 +13,7 @@ Metadata:
       for clients on the Cimpress Mass Customization Platform.
     Author: Christopher Osborn
     SpdxLicenseId: Apache-2.0
-    LicenseUrl: https://www.apache.org/licenses/LICENSE-2.0.txt
+    LicenseUrl: ./LICENSE
     ReadMeUrl: ./README.md
     Labels:
     - auth0

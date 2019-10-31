@@ -4,7 +4,7 @@ stages:
 - test
 - build
 - package
-- deploy
+- publish
 
 variables:
   AWS_DEFAULT_OUTPUT: text
@@ -45,8 +45,8 @@ package:
   only:
   - master
 
-deploy:
-  stage: deploy
+publish:
+  stage: publish
   script:
   - sam publish --template ./template.out.yml
   only:

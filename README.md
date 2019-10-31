@@ -16,39 +16,44 @@ Here's an example use, provided in AWS Cloudformation:
 
 ```yaml
 # snip
-ExampleSecretRotator:
-  Type: AWS::Serverless::Application
-  Properties:
-    Location:
-      ApplicationId: arn:aws:serverlessrepo:us-east-1:820870426321:applications/platform-client-secret-rotator
-      SemanticVersion: 1.0.0
-    Parameters:
-      Endpoint: !Sub https://secretsmanager.${AWS::Region}.${AWS::URLSuffix}
-      FunctionName: secret-rotator
-ExampleSecretRotatorInvokePermission:
-  Type: AWS::Lambda::Permission
-  Properties:
-    FunctionName: !GetAtt ExampleSecretRotator.Outputs.RotationLambdaARN
-    Action: lambda:InvokeFunction
-    Principal: !Sub secretsmanager.${AWS::URLSuffix}
-ExampleSecret:
-  Type: AWS::SecretsManager::Secret
-  Properties:
-    Description: An example client ID and secret.
-    GenerateSecretString:
-      SecretStringTemplate: |-
-        { "id": "<<client_id>>" }
-      GenerateStringKey: secret
-      PasswordLength: 64
-      ExcludeCharacters: |-
-        !"#$%&'()*,/:;<>?@[\]^`{|}~
-ExampleSecretRotationSchedule:
-  Type: AWS::SecretsManager::RotationSchedule
-  Properties:
-    RotationLambdaARN: !GetAtt ExampleSecretRotator.Outputs.RotationLambdaARN
-    RotationRules:
-      AutomaticallyAfterDays: 30
-    SecretId: !Ref ExampleSecret
+
+Transform: AWS::Serverless-2016-10-31
+
+# snip
+Resources:
+  ExampleSecretRotator:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:820870426321:applications/platform-client-secret-rotator
+        SemanticVersion: 1.0.0
+      Parameters:
+        Endpoint: !Sub https://secretsmanager.${AWS::Region}.${AWS::URLSuffix}
+        FunctionName: secret-rotator
+  ExampleSecretRotatorInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt ExampleSecretRotator.Outputs.RotationLambdaARN
+      Action: lambda:InvokeFunction
+      Principal: !Sub secretsmanager.${AWS::URLSuffix}
+  ExampleSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: An example client ID and secret.
+      GenerateSecretString:
+        SecretStringTemplate: |-
+          { "id": "<<client_id>>" }
+        GenerateStringKey: secret
+        PasswordLength: 64
+        ExcludeCharacters: |-
+          !"#$%&'()*,/:;<>?@[\]^`{|}~
+  ExampleSecretRotationSchedule:
+    Type: AWS::SecretsManager::RotationSchedule
+    Properties:
+      RotationLambdaARN: !GetAtt ExampleSecretRotator.Outputs.RotationLambdaARN
+      RotationRules:
+        AutomaticallyAfterDays: 30
+      SecretId: !Ref ExampleSecret
 # snip
 ```
 

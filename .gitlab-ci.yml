@@ -33,8 +33,7 @@ build:
 package:
   stage: package
   before_script:
-  # The deployment bucket is in eu-west-1, but public SAR deployments must go to us-east-1.
-  - export BUCKET="$(aws cloudformation list-exports --region eu-west-1 --query "Exports[?Name=='DeploymentBucket'].Value")"
+  - export BUCKET="$(aws cloudformation list-exports --query "Exports[?Name=='DeploymentBucket'].Value")"
   script:
   - sam package
     --s3-bucket "${BUCKET}"
@@ -49,6 +48,7 @@ package:
 publish:
   stage: publish
   script:
-  - sam publish --template ./template.out.yml
+  # Public SAR deployments must go to us-east-1.
+  - sam publish --region us-east-1 --template ./template.out.yml
   only:
   - master

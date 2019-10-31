@@ -20,7 +20,7 @@ test:
   - pip install cfn-lint
   script:
   - sam validate
-  - cfn-lint --template ./template.yaml
+  - cfn-lint --template ./template.yml
 
 build:
   stage: build
@@ -28,7 +28,7 @@ build:
   - sam build
   artifacts:
     paths:
-    - ./aws-sam/
+    - ./.aws-sam/
 
 package:
   stage: package

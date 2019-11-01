@@ -14,7 +14,7 @@ Metadata:
     Author: Christopher Osborn
     SpdxLicenseId: Apache-2.0
     LicenseUrl: ./LICENSE
-    ReadMeUrl: ./README.md
+    ReadmeUrl: ./README.md
     Labels:
     - auth0
     - cimpress

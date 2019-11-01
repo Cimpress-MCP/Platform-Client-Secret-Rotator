@@ -14,7 +14,7 @@ Metadata:
     Author: Christopher Osborn
     SpdxLicenseId: Apache-2.0
     LicenseUrl: ./LICENSE
-    ReadMeUrl: ./README.md
+    ReadmeUrl: ./README.md
     Labels:
     - auth0
     - cimpress
@@ -26,7 +26,7 @@ Metadata:
     - rotator
     - client-secret
     HomePageUrl: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator
-    SemanticVersion: 0.0.1
+    SemanticVersion: 1.0.0
     SourceCodeUrl: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator
 
 Parameters:

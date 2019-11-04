@@ -79,3 +79,11 @@ There is an unavoidable bootstrapping step when deploying the Platform Client Se
 
 [AWS Secrets Manager]: https://aws.amazon.com/secrets-manager/
 [Auth0 Client Secret]: https://auth0.com/docs/applications/concepts/client-secret
+
+## Inspirations
+
+* AWS's [Rotation Lambda Functions][] for RDS credentials
+* The CloudFormation [Custom Resource Helper][] library
+
+[Rotation Lambda Functions]: https://github.com/aws-samples/aws-secrets-manager-rotation-lambdas
+[Custom Resource Helper]: https://github.com/aws-cloudformation/custom-resource-helper

@@ -7,11 +7,15 @@ import os
 import requests
 import urllib.parse
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
 
 # Client Secrets may include "numbers, letters and _, -, +, =, . symbols"
 EXCLUDE_CHARACTERS = r'''!"#$%&'()*,/:;<>?@[\]^`{|}~'''
+
+
+# Set up the dependencies
+logger = logging.getLogger()
+service_client = boto3.client('secretsmanager', endpoint_url=os.environ['SECRETS_MANAGER_ENDPOINT'])
+
 
 def handle(event, context):
   """Secrets Manager Client Secret Rotator
@@ -46,48 +50,39 @@ def handle(event, context):
   token = event['ClientRequestToken']
   step = event['Step']
 
-  # Set up the client
-  service_client = boto3.client('secretsmanager', endpoint_url=os.environ['SECRETS_MANAGER_ENDPOINT'])
-
   # Make sure that the version is staged correctly
   metadata = service_client.describe_secret(SecretId=arn)
   if 'RotationEnabled' in metadata and not metadata['RotationEnabled']:
-    logger.error(f'Secret {arn} is not enabled for rotation.')
     raise ValueError(f'Secret {arn} is not enabled for rotation.')
   versions = metadata['VersionIdsToStages']
   if token not in versions:
-    logger.error(f'Secret version {token} has no stage for rotation of secret {arn}.')
     raise ValueError(f'Secret version {token} has no stage for rotation of secret {arn}.')
   if 'AWSCURRENT' in versions[token]:
     logger.info(f'Secret version {token} is already set as AWSCURRENT for secret {arn}.')
     return
   elif 'AWSPENDING' not in versions[token]:
-    logger.error(f'Secret version {token} is not set as AWSPENDING for rotation of secret {arn}.')
     raise ValueError(f'Secret version {token} is not set as AWSPENDING for rotation of secret {arn}.')
 
   # Call the appropriate step
   if step == 'createSecret':
-    create_secret(service_client, arn, token)
+    create_secret(arn, token)
   elif step == 'setSecret':
-    set_secret(service_client, arn, token)
+    set_secret(arn, token)
   elif step == 'testSecret':
-    test_secret(service_client, arn, token)
+    test_secret(arn, token)
   elif step == 'finishSecret':
-    finish_secret(service_client, arn, token)
+    finish_secret(arn, token)
   else:
-    logger.error(f'lambda_handler: Invalid step parameter {step} for secret {arn}.')
-    raise ValueError(f'lambda_handler: Invalid step parameter {step} for secret {arn}.')
+    raise ValueError(f'handle: Invalid step parameter {step} for secret {arn}.')
 
 
-def create_secret(service_client, arn, token):
+def create_secret(arn, token):
   """Generate a new secret
 
   This method first checks for the existence of a secret for the passed-in token. If one does not exist, it will generate a
   new secret and put is with the passed-in token.
 
   Args:
-    service_client (client): The secrets manager service client
-
     arn (string): The secret ARN or other identifier
 
     token (string): The ClientRequestToken associated with the secret version
@@ -99,11 +94,11 @@ def create_secret(service_client, arn, token):
 
   """
   # Make sure the current secret exists
-  current_dict = get_secret_dict(service_client, arn, 'AWSCURRENT')
+  current_dict = get_secret_dict(arn, 'AWSCURRENT')
 
   # Now try to get the secret version. If that fails, put a new secret
   try:
-    get_secret_dict(service_client, arn, 'AWSPENDING', token)
+    get_secret_dict(arn, 'AWSPENDING', token)
     logger.info(f'create_secret: Successfully retrieved secret for {arn}.')
   except service_client.exceptions.ResourceNotFoundException:
     # Generate a random client secret according to length recommendations and allowed character set
@@ -115,7 +110,7 @@ def create_secret(service_client, arn, token):
     logger.info(f'create_secret: Successfully put secret for ARN {arn} and version {token}.')
 
 
-def set_secret(service_client, arn, token):
+def set_secret(arn, token):
   """Set the pending secret as the client secret
 
   This method tries to create an access token with the AWSPENDING secret and returns on success. If that fails, it
@@ -123,8 +118,6 @@ def set_secret(service_client, arn, token):
   as the client secret. Otherwise, it raises a ValueError.
 
   Args:
-    service_client (client): The secrets manager service client
-
     arn (string): The secret ARN or other identifier
 
     token (string): The ClientRequestToken associated with the secret version
@@ -138,38 +131,35 @@ def set_secret(service_client, arn, token):
 
   """
   # First try to create an access token with the pending secret. If it succeeds, return
-  pending_dict = get_secret_dict(service_client, arn, 'AWSPENDING', token)
+  pending_dict = get_secret_dict(arn, 'AWSPENDING', token)
   access_token = create_access_token(pending_dict)
   if access_token:
     logger.info(f'set_secret: AWSPENDING secret is already set as client secret for secret {arn}.')
     return
 
-  # Now try the current password
-  access_token = create_access_token(get_secret_dict(service_client, arn, 'AWSCURRENT'))
+  # Now try the current secret
+  access_token = create_access_token(get_secret_dict(arn, 'AWSCURRENT'))
   if not access_token:
     # If both current and pending do not work, try previous
     try:
-      access_token = create_access_token(get_secret_dict(service_client, arn, 'AWSPREVIOUS'))
+      access_token = create_access_token(get_secret_dict(arn, 'AWSPREVIOUS'))
     except service_client.exceptions.ResourceNotFoundException:
       access_token = None
 
   # If we still don't have an access token, complain bitterly
   if not access_token:
-    logger.error(f'set_secret: Unable to acquire access token with previous, current, or pending secret of secret arn {arn}!')
     raise ValueError(f'set_secret: Unable to acquire access token with previous, current, or pending secret of secret arn {arn}!')
 
   # Now set the client secret to the pending client secret
   set_client_secret(pending_dict, access_token)
 
 
-def test_secret(service_client, arn, token):
+def test_secret(arn, token):
   """Test the pending secret by creating an access token
 
   This method tries to acquire an access token with the secrets staged with AWSPENDING.
 
   Args:
-      service_client (client): The secrets manager service client
-
       arn (string): The secret ARN or other identifier
 
       token (string): The ClientRequestToken associated with the secret version
@@ -183,20 +173,17 @@ def test_secret(service_client, arn, token):
 
   """
   # Try to acquire an acccess token with the pending secret
-  access_token = create_access_token(get_secret_dict(service_client, arn, 'AWSPENDING', token))
+  access_token = create_access_token(get_secret_dict(arn, 'AWSPENDING', token))
   if not access_token:
-    logger.error(f'test_secret: Unable to acquire access token with pending secret of secret ARN {arn}.')
     raise ValueError(f'test_secret: Unable to acquire access token with pending secret of secret ARN {arn}.')
 
 
-def finish_secret(service_client, arn, token):
+def finish_secret(arn, token):
   """Finish the rotation by marking the pending secret as current
 
   This method finishes the secret rotation by staging the secret staged AWSPENDING with the AWSCURRENT stage.
 
   Args:
-      service_client (client): The secrets manager service client
-
       arn (string): The secret ARN or other identifier
 
       token (string): The ClientRequestToken associated with the secret version
@@ -294,14 +281,12 @@ def set_client_secret(secret_dict, access_token):
   response.raise_for_status()
 
 
-def get_secret_dict(service_client, arn, stage, token=None):
+def get_secret_dict(arn, stage, token=None):
   """Gets the secret dictionary corresponding to the secret arn, stage, and token
 
   This helper function gets client credentials for the arn and stage passed in and returns the dictionary by parsing the JSON string
 
   Args:
-    service_client (client): The secrets manager service client
-
     arn (string): The secret ARN or other identifier
 
     token (string): the ClientRequestToken associated with the secret version, or None if no validation is desired

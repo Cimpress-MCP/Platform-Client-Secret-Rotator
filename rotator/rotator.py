@@ -125,7 +125,7 @@ def set_secret(arn, token):
   Raises:
     ResourceNotFoundException: If the secret with the specified ARN and stage does not exist
 
-    ValueError: If the secret is not valid JSON or valid credentials are found to log in to the database
+    ValueError: If the secret is not valid JSON or valid credentials are not found to acquire an access token
 
     KeyError: If the secret JSON does not contain the expected keys
 

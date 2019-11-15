@@ -1,5 +1,10 @@
 # Client Secret Rotation
 
+[![Find it on the Serverless Application Repository][logo]][install]
+
+[logo]: https://img.shields.io/badge/Install-Find%20it%20on%20the%20Serverless%20Application%20Repository-brightgreen
+[install]: https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:820870426321:applications~platform-client-secret-rotator
+
 ## What It Is
 
 The Platform Client Secret Rotator is an AWS Secrets Manager [Lambda Function Rotator][] intended to be used with AWS Secrets Manager and Auth0. Secrets Manager can use rotators implemented as Lambda Functions to securely and automatically rotate secret configuration values. This rotator is configured out of the box for use with the Cimpress Mass Customization Platform.

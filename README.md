@@ -1,9 +1,13 @@
 # Client Secret Rotation
 
-[![Find it on the Serverless Application Repository][logo]][install]
+[![Find it on the Serverless Application Repository][logo]][sam]
 
-[logo]: https://img.shields.io/badge/Install-Find%20it%20on%20the%20Serverless%20Application%20Repository-brightgreen
-[install]: https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:820870426321:applications~platform-client-secret-rotator
+[logo]: https://img.shields.io/badge/SAM-Find%20it%20on%20the%20Serverless%20Application%20Repository-brightgreen
+[sam]: https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:820870426321:applications~platform-client-secret-rotator
+
+Find [step-by-step installation and setup instructions][] on the wiki!
+
+[step-by-step installation and setup instructions]: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator/wiki/Step-by-Step
 
 ## What It Is
 

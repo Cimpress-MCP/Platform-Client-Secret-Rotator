@@ -5,9 +5,9 @@
 [logo]: https://img.shields.io/badge/SAM-Find%20it%20on%20the%20Serverless%20Application%20Repository-brightgreen
 [sam]: https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:820870426321:applications~platform-client-secret-rotator
 
-Find [step-by-step installation and setup instructions][] on the wiki!
+Find [step-by-step deployment and configuration instructions][] on the wiki!
 
-[step-by-step installation and setup instructions]: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator/wiki/Step-by-Step
+[step-by-step installation and setup instructions]: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator/wiki/Step-by-Step-Setup
 
 ## What It Is
 
@@ -79,3 +79,11 @@ There is an unavoidable bootstrapping step when deploying the Platform Client Se
 
 [AWS Secrets Manager]: https://aws.amazon.com/secrets-manager/
 [Auth0 Client Secret]: https://auth0.com/docs/applications/concepts/client-secret
+
+## Inspirations
+
+* AWS's [Rotation Lambda Functions][] for RDS credentials
+* The CloudFormation [Custom Resource Helper][] library
+
+[Rotation Lambda Functions]: https://github.com/aws-samples/aws-secrets-manager-rotation-lambdas
+[Custom Resource Helper]: https://github.com/aws-cloudformation/custom-resource-helper

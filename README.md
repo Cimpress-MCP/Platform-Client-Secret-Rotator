@@ -5,9 +5,9 @@
 [logo]: https://img.shields.io/badge/SAM-Find%20it%20on%20the%20Serverless%20Application%20Repository-brightgreen
 [sam]: https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:820870426321:applications~platform-client-secret-rotator
 
-Find [step-by-step installation and setup instructions][] on the wiki!
+Find [step-by-step deployment and configuration instructions][] on the wiki!
 
-[step-by-step installation and setup instructions]: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator/wiki/Step-by-Step
+[step-by-step installation and setup instructions]: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator/wiki/Step-by-Step-Setup
 
 ## What It Is
 

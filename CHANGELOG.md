@@ -1,3 +1,9 @@
+## Version 1.1.0 (Released 2020-01-14)
+
+- The permission to allow Secrets Manager to invoke the rotation Lambda have been moved into the application.
+  - This requires a new capability acknowledgement: `CAPABILITY_RESOURCE_POLICY`.
+- The rotator can rotate secrets encrypted by a customer-managed KMS key.
+
 ## Version 1.0.2 (Released 2019-11-25)
 
 - The runtime has been updated to `python3.8`.

@@ -26,7 +26,7 @@ Metadata:
     - rotator
     - client-secret
     HomePageUrl: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator
-    SemanticVersion: 1.0.2
+    SemanticVersion: 1.1.0
     SourceCodeUrl: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator
 
 Parameters:
@@ -46,6 +46,17 @@ Parameters:
   FunctionName:
     Type: String
     Description: The name of the Lambda Function.
+  InvokingServicePrincipal:
+    Type: String
+    Description: The service principal of the invoking service.
+    Default: secretsmanager.amazonaws.com
+  KmsKeyArn:
+    Type: String
+    Description: The KMS key used to encrypt the secret being rotated.
+    Default: ''
+
+Conditions:
+  KmsKeyArnExists: !Not [ !Equals [ '', !Ref KmsKeyArn ] ]
 
 Resources:
   SecretsManagerAuth0ClientSecretRotation:
@@ -60,6 +71,17 @@ Resources:
       Policies:
       - AWSSecretsManagerRotationPolicy:
           FunctionName: !Ref FunctionName
+      - !If
+        - KmsKeyArnExists
+        - Version: 2012-10-17
+          Statement:
+            Effect: Allow
+            Action:
+            - kms:Decrypt
+            - kms:DescribeKey
+            - kms:GenerateDataKey
+            Resource: !Ref KmsKeyArn
+        - !Ref AWS::NoValue
       Environment:
         Variables:
           AUDIENCE: !Ref Audience
@@ -67,6 +89,12 @@ Resources:
           SECRETS_MANAGER_ENDPOINT: !Ref Endpoint
       Tags:
         SecretsManagerLambda: Rotation
+  Permission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt SecretsManagerAuth0ClientSecretRotation.Arn
+      Principal: !Ref InvokingServicePrincipal
 
 Outputs:
   RotationLambdaARN:

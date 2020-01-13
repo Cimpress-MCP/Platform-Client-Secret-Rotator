@@ -39,12 +39,6 @@ Resources:
       Parameters:
         Endpoint: !Sub https://secretsmanager.${AWS::Region}.${AWS::URLSuffix}
         FunctionName: secret-rotator
-  ExampleSecretRotatorInvokePermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !GetAtt ExampleSecretRotator.Outputs.RotationLambdaARN
-      Action: lambda:InvokeFunction
-      Principal: !Sub secretsmanager.${AWS::URLSuffix}
   ExampleSecret:
     Type: AWS::SecretsManager::Secret
     Properties:

@@ -26,7 +26,7 @@ Metadata:
     - rotator
     - client-secret
     HomePageUrl: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator
-    SemanticVersion: 1.1.1
+    SemanticVersion: 1.1.2
     SourceCodeUrl: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator
 
 Parameters:
@@ -64,7 +64,7 @@ Resources:
     Properties:
       FunctionName: !Ref FunctionName
       Description: Conducts an AWS Secrets Manager rotation for OAuth2 Client Secret
-      Handler: rotator.handle
+      Handler: rotator.lambda_handler
       Runtime: python3.8
       CodeUri: ./rotator/
       Timeout: 30

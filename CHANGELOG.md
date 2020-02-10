@@ -1,7 +1,7 @@
-## Version 1.1.3 (Released 2020-02-10)
+## Version 1.1.4 (Released 2020-02-10)
 
 - An error related to exception handling has been corrected.
-- THe JSON structure of the generated secret has been improved.
+- The JSON structure of the generated secret has been improved.
 
 ## Version 1.1.0 (Released 2020-01-14)
 

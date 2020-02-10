@@ -85,7 +85,7 @@ def create_secret(service_client, arn, token):
 
     # Now try to get the secret version, if that fails, put a new secret
     try:
-        get_secret_dict(service_client, arn, "AWSPENDING", token)
+        _get_secret_dict(service_client, arn, "AWSPENDING", token)
         logger.info("createSecret: Successfully retrieved secret for %s." % arn)
 
     except service_client.exceptions.ResourceNotFoundException:

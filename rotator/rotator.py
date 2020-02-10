@@ -81,19 +81,20 @@ def create_secret(service_client, arn, token):
         ResourceNotFoundException: If the secret with the specified arn and stage does not exist
     """
     # Make sure the current secret exists
-    service_client.get_secret_value(SecretId=arn, VersionStage="AWSCURRENT")
+    current_dict = _get_secret_dict(service_client, arn, "AWSCURRENT")
 
     # Now try to get the secret version, if that fails, put a new secret
     try:
-        service_client.get_secret_value(SecretId=arn, VersionId=token, VersionStage="AWSPENDING")
+        get_secret_dict(service_client, arn, "AWSPENDING", token)
         logger.info("createSecret: Successfully retrieved secret for %s." % arn)
 
     except service_client.exceptions.ResourceNotFoundException:
         # Generate a random password
-        passwd = service_client.get_random_password(ExcludeCharacters=EXCLUDE_CHARACTERS)
+        client_secret = service_client.get_random_password(PasswordLength=64, ExcludeCharacters=EXCLUDE_CHARACTERS)
+        current_dict['secret'] = client_secret['RandomPassword']
 
         # Put the secret
-        service_client.put_secret_value(SecretId=arn, ClientRequestToken=token, SecretString=passwd['RandomPassword'], VersionStages=['AWSPENDING'])
+        service_client.put_secret_value(SecretId=arn, ClientRequestToken=token, SecretString=json.dumps(current_dict), VersionStages=['AWSPENDING'])
         logger.info("createSecret: Successfully put secret for ARN %s and version %s." % (arn, token))
 
 

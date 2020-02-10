@@ -26,7 +26,7 @@ Metadata:
     - rotator
     - client-secret
     HomePageUrl: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator
-    SemanticVersion: 1.1.2
+    SemanticVersion: 1.1.3
     SourceCodeUrl: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator
 
 Parameters:

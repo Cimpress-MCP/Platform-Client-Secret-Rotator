@@ -1,4 +1,4 @@
-## Version 1.1.1 (Released 2020-02-10)
+## Version 1.1.2 (Released 2020-02-10)
 
 - An error related to exception handling has been corrected.
 

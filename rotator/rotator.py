@@ -117,11 +117,11 @@ def set_secret(service_client, arn, token):
     access_token = _create_access_token(_get_secret_dict(service_client, arn, 'AWSCURRENT'))
     if not access_token:
     # If both current and pending do not work, try previous
-    try:
-        access_token = _create_access_token(_get_secret_dict(service_client, arn, 'AWSPREVIOUS'))
+        try:
+            access_token = _create_access_token(_get_secret_dict(service_client, arn, 'AWSPREVIOUS'))
 
-    except service_client.exceptions.ResourceNotFoundException:
-        access_token = None
+        except service_client.exceptions.ResourceNotFoundException:
+            access_token = None
 
     # If we still don't have an access token, complain bitterly
     if not access_token:

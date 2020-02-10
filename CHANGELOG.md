@@ -1,3 +1,7 @@
+## Version 1.1.1 (Released 2020-02-10)
+
+- An error related to exception handling has been corrected.
+
 ## Version 1.1.0 (Released 2020-01-14)
 
 - The permission to allow Secrets Manager to invoke the rotation Lambda have been moved into the application.

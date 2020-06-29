@@ -51,4 +51,4 @@ publish:
   # Public SAR deployments must go to us-east-1.
   - sam publish --region us-east-1 --template ./template.out.yml
   only:
-  - master
+  - main

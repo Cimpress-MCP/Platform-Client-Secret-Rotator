@@ -1,5 +1,3 @@
-image: lambci/lambda:build-python3.8
-
 stages:
 - test
 - build
@@ -8,21 +6,27 @@ stages:
 
 variables:
   AWS_DEFAULT_OUTPUT: text
+  AWS_DEFAULT_REGION: eu-west-1
+  AWS_REGION: eu-west-1
   SAM_CLI_TELEMETRY: 0
-  SERVICE_NAME: platform-client-secret-rotator
 
 cache:
-  key: "$CI_PIPELINE_ID"
+  key: ${CI_PIPELINE_ID}
 
-test:
+test-template:
+  image: public.ecr.aws/sam/build-provided.al2
   stage: test
   before_script:
-  - pip install cfn-lint
+  - pip install --quiet cfn-lint
   script:
   - sam validate
-  - cfn-lint --template ./template.yml
+  - cfn-lint --template ./template.yaml --format junit > ./template.cfn-lint.xml
+  artifacts:
+    reports:
+      junit: ./template.cfn-lint.xml
 
 build:
+  image: image: lambci/lambda:build-python3.10
   stage: build
   script:
   - sam build
@@ -30,25 +34,38 @@ build:
     paths:
     - ./.aws-sam/
 
+bucket:
+  image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base
+  stage: build
+  script:
+  - export BUCKET="$(aws cloudformation list-exports --query "Exports[?Name=='DeploymentBucket'].Value")"
+  - echo "BUCKET=${BUCKET}" >>./bucket.env
+  artifacts:
+    reports:
+      dotenv: ./bucket.env
+
 package:
   stage: package
-  before_script:
-  - export BUCKET="$(aws cloudformation list-exports --query "Exports[?Name=='DeploymentBucket'].Value")"
   script:
-  - sam package
+  - >-
+    sam package
     --s3-bucket "${BUCKET}"
-    --s3-prefix "${SERVICE_NAME}"
-    --output-template-file ./template.out.yml
+    --s3-prefix "${CI_PROJECT_NAME}"
+    >./template.out.yml
   artifacts:
     paths:
     - ./template.out.yml
-  only:
-  - master
+  rules:
+  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-publish:
-  stage: publish
+deploy:
+  image: public.ecr.aws/sam/build-provided.al2
+  stage: deploy
+  variables:
+    # This component publishes to us-east-1.
+    AWS_DEFAULT_REGION: us-east-1
+    AWS_REGION: us-east-1
   script:
-  # Public SAR deployments must go to us-east-1.
-  - sam publish --region us-east-1 --template ./template.out.yml
-  only:
-  - main
+  - sam publish --template-file ./template.out.yml
+  rules:
+  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

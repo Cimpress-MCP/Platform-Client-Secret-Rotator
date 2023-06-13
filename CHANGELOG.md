@@ -1,3 +1,7 @@
+## Version 2.0.1 (Released 2023-05-13)
+
+- Correct Client Registry Address
+
 ## Version 2.0.0 (Released 2023-05-01)
 
 - BREAKING: The Auth0 Façade has been supplanted by the Client Registry.

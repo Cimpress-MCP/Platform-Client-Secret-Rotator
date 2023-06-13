@@ -14,7 +14,7 @@ from urllib.parse import urljoin
 # …but the Client Registry has additional restrictions.
 EXCLUDE_CHARACTERS = r'''"%!'()*,/:;?@[\]`{|}~<>^&#$'''
 
-CLIENT_REGISTRY_TEMPLATE = URITemplate('https://auth0.cimpress.io/v1/clients/{client_id}/secrets')
+CLIENT_REGISTRY_TEMPLATE = URITemplate('https://clients.oauth.cimpress.io/v1/clients/{client_id}/secrets')
 
 REQUIRED_FIELDS = ['id', 'secret']
 

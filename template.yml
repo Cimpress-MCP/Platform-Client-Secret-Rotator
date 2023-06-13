@@ -26,7 +26,7 @@ Metadata:
     - rotator
     - client-secret
     HomePageUrl: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator
-    SemanticVersion: 1.1.4
+    SemanticVersion: 2.0.0
     SourceCodeUrl: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator
 
 Parameters:
@@ -34,22 +34,22 @@ Parameters:
     Description: The audience which this client is a member of, authenticationally.
     Type: String
     Default: https://api.cimpress.io/
-  Authority:
-    Description: The source of tokens and the issuer of claims.
-    Type: String
-    Default: https://cimpress.auth0.com/
-    AllowedPattern: ^https:\/\/.+
-    ConstraintDescription: Authority must be an HTTPS URL.
   Endpoint:
     Type: String
     Description: The Secrets Manager endpoint to hit.
   FunctionName:
     Type: String
-    Description: The name of the Lambda Function.
+    Description: The name of the Lambda Function to create.
   InvokingServicePrincipal:
     Type: String
     Description: The service principal of the invoking service.
     Default: secretsmanager.amazonaws.com
+  Issuer:
+    Description: The source of tokens and the issuer of claims.
+    Type: String
+    Default: https://oauth.cimpress.io/
+    AllowedPattern: ^https:\/\/.+
+    ConstraintDescription: Issuer must be an HTTPS URL.
   KmsKeyArn:
     Type: String
     Description: The KMS key used to encrypt the secret being rotated.
@@ -65,7 +65,7 @@ Resources:
       FunctionName: !Ref FunctionName
       Description: Conducts an AWS Secrets Manager rotation for OAuth2 Client Secret
       Handler: rotator.lambda_handler
-      Runtime: python3.8
+      Runtime: python3.10
       CodeUri: ./rotator/
       Timeout: 30
       Policies:
@@ -85,7 +85,7 @@ Resources:
       Environment:
         Variables:
           AUDIENCE: !Ref Audience
-          AUTHORITY: !Ref Authority
+          ISSUER: !Ref Issuer
           SECRETS_MANAGER_ENDPOINT: !Ref Endpoint
       Tags:
         SecretsManagerLambda: Rotation

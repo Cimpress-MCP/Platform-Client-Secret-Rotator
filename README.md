@@ -35,7 +35,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:820870426321:applications/platform-client-secret-rotator
-        SemanticVersion: 1.1.4
+        SemanticVersion: 2.0.0
       Parameters:
         Endpoint: !Sub https://secretsmanager.${AWS::Region}.${AWS::URLSuffix}
         FunctionName: !Sub ${AWS::StackName}-client-credentials-secret-rotator
@@ -50,7 +50,7 @@ Resources:
         GenerateStringKey: secret
         PasswordLength: 64
         ExcludeCharacters: |-
-          !"#$%&'()*,/:;<>?@[\]^`{|}~
+          "%!'()*,/:;?@[\]`{|}~<>^&#$
       KmsKeyId: !Ref EncryptionKey
   ExampleSecretRotationSchedule:
     Type: AWS::SecretsManager::RotationSchedule

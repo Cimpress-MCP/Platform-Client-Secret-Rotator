@@ -1,3 +1,8 @@
+## Version 2.0.0 (Released 2023-05-01)
+
+- BREAKING: The Auth0 Façade has been supplanted by the Client Registry.
+  - AUTHORITY has been renamed to ISSUER, accordingly.
+
 ## Version 1.1.4 (Released 2020-02-10)
 
 - An error related to exception handling has been corrected.

@@ -1,3 +1,7 @@
+## Version 2.0.2 (Released 2023-06-21)
+
+- Correct Serialization of DateTime Values
+
 ## Version 2.0.1 (Released 2023-05-13)
 
 - Correct Client Registry Address

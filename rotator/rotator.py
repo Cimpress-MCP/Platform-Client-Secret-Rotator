@@ -237,7 +237,7 @@ def _set_client_secret(secret_dict, access_token):
     """
     payload = {
         'client_secret': secret_dict['secret'],
-        'expire_previous_secrets_at': datetime.now(timezone.utc),
+        'expire_previous_secrets_at': datetime.now(timezone.utc).isoformat(),
     }
     headers = {
         'Accept': 'application/json',

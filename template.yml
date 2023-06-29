@@ -26,7 +26,7 @@ Metadata:
     - rotator
     - client-secret
     HomePageUrl: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator
-    SemanticVersion: 2.0.2
+    SemanticVersion: 2.1.0
     SourceCodeUrl: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator
 
 Parameters:
@@ -54,6 +54,15 @@ Parameters:
     Type: String
     Description: The KMS key used to encrypt the secret being rotated.
     Default: ''
+  OverlapDuration:
+    Type: String
+    Description: >-
+      The amount of time after rotation for which a previous client secret will be active.
+      This value should be taken into account when determining rotation cadence, as it
+      could keep a client secret active longer than is compliant.
+    Default: P1D
+    AllowedPattern: ^\+?P
+    ConstraintDescription: Must be a valid positive ISO duration. (P1D, PT8H, PT1H30M, &c.)
 
 Conditions:
   KmsKeyArnExists: !Not [ !Equals [ '', !Ref KmsKeyArn ] ]
@@ -86,6 +95,7 @@ Resources:
         Variables:
           AUDIENCE: !Ref Audience
           ISSUER: !Ref Issuer
+          OVERLAP_DURATION: !Ref OverlapDuration
           SECRETS_MANAGER_ENDPOINT: !Ref Endpoint
       Tags:
         SecretsManagerLambda: Rotation

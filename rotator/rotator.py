@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import boto3
+import isoduration
 import json
 import logging
 import os
@@ -235,9 +236,11 @@ def _set_client_secret(secret_dict, access_token):
 
     This helper function sets the client secret
     """
+    overlap_period = isoduration.parse_duration(os.environ['OVERLAP_PERIOD'])
+    expire_previous_secrets_at = datetime.now(timezone.utc) + overlap_period
     payload = {
         'client_secret': secret_dict['secret'],
-        'expire_previous_secrets_at': datetime.now(timezone.utc).isoformat(),
+        'expire_previous_secrets_at': expire_previous_secrets_at.isoformat(),
     }
     headers = {
         'Accept': 'application/json',

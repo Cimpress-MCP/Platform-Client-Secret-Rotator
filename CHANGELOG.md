@@ -1,3 +1,7 @@
+## Version 2.1.0 (Released 2023-06-29)
+
+- Allow Client-Specified Secret Overlap Duration
+
 ## Version 2.0.2 (Released 2023-06-21)
 
 - Correct Serialization of DateTime Values

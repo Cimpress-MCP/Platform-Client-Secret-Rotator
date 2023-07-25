@@ -1,3 +1,7 @@
+## Version 2.1.1 (Released 2023-07-25)
+
+- Correct Name of Environment Variable
+
 ## Version 2.1.0 (Released 2023-06-29)
 
 - Allow Client-Specified Secret Overlap Duration

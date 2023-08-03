@@ -97,6 +97,8 @@ Resources:
           ISSUER: !Ref Issuer
           OVERLAP_DURATION: !Ref OverlapDuration
           SECRETS_MANAGER_ENDPOINT: !Ref Endpoint
+          SECRET_KEY: secret
+          ID_KEY: id
       Tags:
         SecretsManagerLambda: Rotation
   Permission:

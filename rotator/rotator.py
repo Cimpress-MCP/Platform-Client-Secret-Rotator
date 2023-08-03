@@ -16,8 +16,10 @@ from urllib.parse import urljoin
 EXCLUDE_CHARACTERS = r'''"%!'()*,/:;?@[\]`{|}~<>^&#$'''
 
 CLIENT_REGISTRY_TEMPLATE = URITemplate('https://clients.oauth.cimpress.io/v1/clients/{client_id}/secrets')
+ID_KEY = os.environ.get('CLIENT_ID_KEY') if os.environ.get('CLIENT_ID_KEY') is not None else "id"
+SECRET_KEY = os.environ.get('CLIENT_SECRET_KEY') if os.environ.get('CLIENT_SECRET_KEY') is not None else "secret"
 
-REQUIRED_FIELDS = ['id', 'secret']
+REQUIRED_FIELDS = [ID_KEY, SECRET_KEY]
 
 
 logger = logging.getLogger()
@@ -95,7 +97,7 @@ def create_secret(arn, token):
     except service_client.exceptions.ResourceNotFoundException:
         # Generate a random password
         client_secret = service_client.get_random_password(PasswordLength=64, ExcludeCharacters=EXCLUDE_CHARACTERS)
-        current_dict['secret'] = client_secret['RandomPassword']
+        current_dict[SECRET_KEY] = client_secret['RandomPassword']
 
         # Put the secret
         service_client.put_secret_value(SecretId=arn, ClientRequestToken=token, SecretString=json.dumps(current_dict), VersionStages=['AWSPENDING'])
@@ -197,8 +199,8 @@ def _create_access_token(secret_dict):
 
     """
     payload = {
-        'client_id': secret_dict['id'],
-        'client_secret': secret_dict['secret'],
+        'client_id': secret_dict[ID_KEY],
+        'client_secret': secret_dict[SECRET_KEY],
         'grant_type': 'client_credentials',
         'audience': os.environ['AUDIENCE']
     }
@@ -239,7 +241,7 @@ def _set_client_secret(secret_dict, access_token):
     overlap_duration = isoduration.parse_duration(os.environ['OVERLAP_DURATION'])
     expire_previous_secrets_at = datetime.now(timezone.utc) + overlap_duration
     payload = {
-        'client_secret': secret_dict['secret'],
+        'client_secret': secret_dict[SECRET_KEY],
         'expire_previous_secrets_at': expire_previous_secrets_at.isoformat(),
     }
     headers = {
@@ -248,7 +250,7 @@ def _set_client_secret(secret_dict, access_token):
         'Content-Type': 'application/json'
     }
 
-    url = CLIENT_REGISTRY_TEMPLATE.expand(client_id=secret_dict['id'])
+    url = CLIENT_REGISTRY_TEMPLATE.expand(client_id=secret_dict[ID_KEY])
     response = requests.post(url, headers=headers, json=payload)
     response.raise_for_status()
 

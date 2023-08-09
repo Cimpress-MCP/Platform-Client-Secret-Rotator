@@ -16,8 +16,8 @@ from urllib.parse import urljoin
 EXCLUDE_CHARACTERS = r'''"%!'()*,/:;?@[\]`{|}~<>^&#$'''
 
 CLIENT_REGISTRY_TEMPLATE = URITemplate('https://clients.oauth.cimpress.io/v1/clients/{client_id}/secrets')
-ID_KEY = os.environ.get('CLIENT_ID_KEY') if os.environ.get('CLIENT_ID_KEY') is not None else "id"
-SECRET_KEY = os.environ.get('CLIENT_SECRET_KEY') if os.environ.get('CLIENT_SECRET_KEY') is not None else "secret"
+ID_KEY = os.environ.get('CLIENT_ID_KEY', 'id')
+SECRET_KEY = os.environ.get('CLIENT_SECRET_KEY', 'secret')
 
 REQUIRED_FIELDS = [ID_KEY, SECRET_KEY]
 

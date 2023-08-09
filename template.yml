@@ -63,6 +63,14 @@ Parameters:
     Default: P1D
     AllowedPattern: ^\+?P
     ConstraintDescription: Must be a valid positive ISO duration. (P1D, PT8H, PT1H30M, &c.)
+  ClientSecretKey:
+    Type: String
+    Description: The key for looking up the client secret in AWS.
+    Default: secret
+  ClientIdKey:
+    Type: String
+    Description: The key for looking up the client id in AWS.
+    Default: id
 
 Conditions:
   KmsKeyArnExists: !Not [ !Equals [ '', !Ref KmsKeyArn ] ]
@@ -97,8 +105,8 @@ Resources:
           ISSUER: !Ref Issuer
           OVERLAP_DURATION: !Ref OverlapDuration
           SECRETS_MANAGER_ENDPOINT: !Ref Endpoint
-          CLIENT_SECRET_KEY: secret
-          CLIENT_ID_KEY: id
+          CLIENT_SECRET_KEY: !Ref ClientSecretKey
+          CLIENT_ID_KEY: !Ref ClientIdKey
       Tags:
         SecretsManagerLambda: Rotation
   Permission:

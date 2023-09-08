@@ -1,3 +1,7 @@
+## Version 2.2.0 (Release 2023-09-08)
+
+- Allow Client-Specified Names of Keys in the Secret Body
+
 ## Version 2.1.1 (Released 2023-07-25)
 
 - Correct Name of Environment Variable

@@ -26,7 +26,7 @@ Metadata:
     - rotator
     - client-secret
     HomePageUrl: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator
-    SemanticVersion: 2.1.1
+    SemanticVersion: 2.2.0
     SourceCodeUrl: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator
 
 Parameters:
@@ -36,7 +36,7 @@ Parameters:
     Default: https://api.cimpress.io/
   Endpoint:
     Type: String
-    Description: The Secrets Manager endpoint to hit.
+    Description: The Secrets Manager endpoint to contact.
   FunctionName:
     Type: String
     Description: The name of the Lambda Function to create.
@@ -65,11 +65,11 @@ Parameters:
     ConstraintDescription: Must be a valid positive ISO duration. (P1D, PT8H, PT1H30M, &c.)
   ClientSecretKey:
     Type: String
-    Description: The key for looking up the client secret in AWS.
+    Description: The key for looking up the client secret within the Secrets Manager Secret.
     Default: secret
   ClientIdKey:
     Type: String
-    Description: The key for looking up the client id in AWS.
+    Description: The key for looking up the client ID within the Secrets Manager Secret.
     Default: id
 
 Conditions:

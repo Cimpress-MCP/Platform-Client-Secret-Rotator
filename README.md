@@ -35,7 +35,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:820870426321:applications/platform-client-secret-rotator
-        SemanticVersion: 2.1.1
+        SemanticVersion: 2.2.0
       Parameters:
         Endpoint: !Sub https://secretsmanager.${AWS::Region}.${AWS::URLSuffix}
         FunctionName: !Sub ${AWS::StackName}-client-credentials-secret-rotator

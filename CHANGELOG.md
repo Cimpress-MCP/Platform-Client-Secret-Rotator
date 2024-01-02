@@ -1,3 +1,7 @@
+## Version 2.2.1 (Release 2023-11-13)
+
+- Correct Bad Replication into us-east-1
+
 ## Version 2.2.0 (Release 2023-09-08)
 
 - Allow Client-Specified Names of Keys in the Secret Body

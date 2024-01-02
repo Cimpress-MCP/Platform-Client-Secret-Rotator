@@ -5,10 +5,6 @@
 [logo]: https://img.shields.io/badge/SAM-Find%20it%20on%20the%20Serverless%20Application%20Repository-brightgreen
 [sam]: https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:820870426321:applications~platform-client-secret-rotator
 
-Find [step-by-step installation and setup instructions][] on the wiki!
-
-[step-by-step installation and setup instructions]: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator/wiki/Step-by-Step-Setup
-
 ## What It Is
 
 The Platform Client Secret Rotator is an AWS Secrets Manager [Lambda Function Rotator][] intended to be used with AWS Secrets Manager and Auth0. Secrets Manager can use rotators implemented as Lambda Functions to securely and automatically rotate secret configuration values. This rotator is configured out of the box for use with the Cimpress Mass Customization Platform.
@@ -21,46 +17,9 @@ For good security hygiene, secret values should be rotated regularly. But _it's 
 
 ## How To Use It
 
-Here's an example use, provided in AWS Cloudformation:
+Please find [step-by-step installation and setup instructions][] on the wiki! They're available for both SAM (CloudFormation) and CDK.
 
-```yaml
-# snip
-
-Transform: AWS::Serverless-2016-10-31
-
-# snip
-Resources:
-  ExampleSecretRotator:
-    Type: AWS::Serverless::Application
-    Properties:
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:820870426321:applications/platform-client-secret-rotator
-        SemanticVersion: 2.2.0
-      Parameters:
-        Endpoint: !Sub https://secretsmanager.${AWS::Region}.${AWS::URLSuffix}
-        FunctionName: !Sub ${AWS::StackName}-client-credentials-secret-rotator
-        KmsKeyArn: !GetAtt EncryptionKey.Arn
-  ExampleSecret:
-    Type: AWS::SecretsManager::Secret
-    Properties:
-      Description: An example client ID and secret.
-      GenerateSecretString:
-        SecretStringTemplate: |-
-          { "id": "<<client_id>>" }
-        GenerateStringKey: secret
-        PasswordLength: 64
-        ExcludeCharacters: |-
-          "%!'()*,/:;?@[\]`{|}~<>^&#$
-      KmsKeyId: !Ref EncryptionKey
-  ExampleSecretRotationSchedule:
-    Type: AWS::SecretsManager::RotationSchedule
-    Properties:
-      RotationLambdaARN: !GetAtt ExampleSecretRotator.Outputs.RotationLambdaARN
-      RotationRules:
-        AutomaticallyAfterDays: 30
-      SecretId: !Ref ExampleSecret
-# snip
-```
+[step-by-step installation and setup instructions]: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator/wiki/Step-by-Step-Setup
 
 ### Bootstrapping
 

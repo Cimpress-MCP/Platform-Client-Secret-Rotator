@@ -35,6 +35,10 @@ There is an unavoidable bootstrapping step when deploying the Platform Client Se
 [AWS Secrets Manager]: https://aws.amazon.com/secrets-manager/
 [Auth0 Client Secret]: https://auth0.com/docs/applications/concepts/client-secret
 
+## Contact
+
+For questions or support, please contact: ctaccessdomain@cimpress.com
+
 ## Inspirations
 
 * AWS's [Rotation Lambda Functions][] for RDS credentials

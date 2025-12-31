@@ -27,13 +27,24 @@ There is an unavoidable bootstrapping step when deploying the Platform Client Se
 
 <!-- It's possible to transfer the secret value earlier, catching the secret in the state between when it is deployed and the rotator is deployed, but why accumulate that much stress in your life? -->
 
+## Supported Clients
+Below are the Supported Clients
+* [Auth0 Clients][]
+* [Cimpress Clients][]
+
+[Auth0 Clients]: https://auth0.com/docs/applications/concepts/client-secret
+[Cimpress Clients]: https://cimpress-support.atlassian.net/wiki/spaces/MCP/pages/16534373427/Client+-+Introduction
+
+
 ## Helpful Links
 
 * [AWS Secrets Manager][]
 * [Auth0 Client Secret][]
+* [How to Rotate Client Secret - API method][]
 
 [AWS Secrets Manager]: https://aws.amazon.com/secrets-manager/
 [Auth0 Client Secret]: https://auth0.com/docs/applications/concepts/client-secret
+[How to Rotate Client Secret - API method]: https://cimpress-support.atlassian.net/wiki/spaces/MCP/pages/15645802497/How+to+Rotate+Client+Secret+-+API+method
 
 ## Contact
 

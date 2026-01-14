@@ -29,6 +29,7 @@ Metadata:
     SemanticVersion: 2.2.1
     SourceCodeUrl: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator
 
+
 Parameters:
   Audience:
     Description: The audience which this client is a member of, authenticationally.
@@ -37,9 +38,11 @@ Parameters:
   Endpoint:
     Type: String
     Description: The Secrets Manager endpoint to contact.
+    Default:  https://secretsmanager.us-east-1.amazonaws.com
   FunctionName:
     Type: String
     Description: The name of the Lambda Function to create.
+    Default:  platform-client-secret-rotator
   InvokingServicePrincipal:
     Type: String
     Description: The service principal of the invoking service.
@@ -61,16 +64,16 @@ Parameters:
       This value should be taken into account when determining rotation cadence, as it
       could keep a client secret active longer than is compliant.
     Default: P1D
-    AllowedPattern: ^\+?P
+    AllowedPattern: ^P\d+D$
     ConstraintDescription: Must be a valid positive ISO duration. (P1D, PT8H, PT1H30M, etc.)
   ClientSecretKey:
     Type: String
     Description: The key for looking up the client secret within the Secrets Manager Secret.
-    Default: secret
+    Default: CLIENT_SECRET
   ClientIdKey:
     Type: String
     Description: The key for looking up the client ID within the Secrets Manager Secret.
-    Default: id
+    Default: CLIENT_ID
 
 Conditions:
   KmsKeyArnExists: !Not [ !Equals [ '', !Ref KmsKeyArn ] ]

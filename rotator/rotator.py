@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import boto3
-import isoduration
 import json
 import logging
 import os
+import re
 import requests
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timedelta
 from uritemplate import URITemplate
 from urllib.parse import urljoin
 
@@ -236,8 +236,8 @@ def _set_client_secret(secret_dict, access_token):
 
     This helper function sets the client secret
     """
-    overlap_duration = isoduration.parse_duration(os.environ['OVERLAP_DURATION'])
-    expire_previous_secrets_at = datetime.now(timezone.utc) + overlap_duration
+    overlap_duration = _parse_iso_day_duration(os.environ['OVERLAP_DURATION'])
+    expire_previous_secrets_at = datetime.now(UTC) + overlap_duration
     payload = {
         'client_secret': secret_dict[SECRET_KEY],
         'expire_previous_secrets_at': expire_previous_secrets_at.isoformat(),
@@ -251,6 +251,14 @@ def _set_client_secret(secret_dict, access_token):
     url = CLIENT_REGISTRY_TEMPLATE.expand(client_id=secret_dict[ID_KEY])
     response = requests.post(url, headers=headers, json=payload)
     response.raise_for_status()
+
+
+def _parse_iso_day_duration(duration_str):
+    """Parses an ISO 8601 duration in the form P<n>D and returns a timedelta."""
+    match = re.fullmatch(r'P(\d+)D', duration_str)
+    if not match:
+        raise ValueError(f'Unsupported ISO duration format: {duration_str}. Expected P<n>D.')
+    return timedelta(days=int(match.group(1)))
 
 
 def _get_secret_dict(arn, stage, token=None):

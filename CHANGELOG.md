@@ -1,3 +1,7 @@
+## Version 2.3.0 (Released 2026-05-08)
+
+- Upgrade Lambda runtime to Python 3.14
+
 ## Version 2.2.1 (Release 2023-11-13)
 
 - Correct Bad Replication into us-east-1

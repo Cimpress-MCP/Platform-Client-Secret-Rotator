@@ -3,7 +3,7 @@
 [![Find it on the Serverless Application Repository][logo]][sam]
 
 [logo]: https://img.shields.io/badge/SAM-Find%20it%20on%20the%20Serverless%20Application%20Repository-brightgreen
-[sam]: https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:820870426321:applications~platform-client-secret-rotator
+[sam]: https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:637423313150:applications~platform-client-secret-rotator
 
 ## What It Is
 

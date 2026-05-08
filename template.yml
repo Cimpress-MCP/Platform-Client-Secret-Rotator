@@ -11,7 +11,7 @@ Metadata:
     Description: >-
       A Secrets Manager rotation Lambda Function which can rotate the client secret
       for clients on the Cimpress Mass Customization Platform.
-    Author: Christopher Osborn
+    Author: access-domain
     SpdxLicenseId: Apache-2.0
     LicenseUrl: ./LICENSE
     ReadmeUrl: ./README.md
@@ -25,8 +25,9 @@ Metadata:
     - rotation
     - rotator
     - client-secret
+    - access-domain
     HomePageUrl: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator
-    SemanticVersion: 2.2.1
+    SemanticVersion: 2.3.0
     SourceCodeUrl: https://github.com/Cimpress-MCP/Platform-Client-Secret-Rotator
 
 

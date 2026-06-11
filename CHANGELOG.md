@@ -1,3 +1,7 @@
+## Version 2.3.1 (Released 2026-06-11)
+
+- Removed default values for `ClientSecretKey` and `ClientIdKey`
+
 ## Version 2.3.0 (Released 2026-05-08)
 
 - Upgrade Lambda runtime to Python 3.14

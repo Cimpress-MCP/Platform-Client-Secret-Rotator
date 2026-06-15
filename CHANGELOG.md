@@ -1,3 +1,7 @@
+## Version 2.3.2 (Released 2026-06-15)
+
+- Added outbound HTTP logging for rotation calls and enforced mixed-character random password generation.
+
 ## Version 2.3.1 (Released 2026-06-11)
 
 - Removed default values for `ClientSecretKey` and `ClientIdKey`

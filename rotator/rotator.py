@@ -22,6 +22,7 @@ REQUIRED_FIELDS = [ID_KEY, SECRET_KEY]
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+HTTP_TIMEOUT_SECONDS = 15
 
 # Setup the client
 service_client = boto3.client('secretsmanager', endpoint_url=os.environ['SECRETS_MANAGER_ENDPOINT'])
@@ -94,7 +95,7 @@ def create_secret(arn, token):
         logger.info(f'createSecret: Successfully retrieved secret for {arn}.')
     except service_client.exceptions.ResourceNotFoundException:
         # Generate a random password
-        client_secret = service_client.get_random_password(PasswordLength=64, ExcludeCharacters=EXCLUDE_CHARACTERS)
+        client_secret = service_client.get_random_password(PasswordLength=64, ExcludeCharacters=EXCLUDE_CHARACTERS, RequireEachIncludedType=True)
         current_dict[SECRET_KEY] = client_secret['RandomPassword']
 
         # Put the secret
@@ -208,8 +209,31 @@ def _create_access_token(secret_dict):
     }
 
     configuration = _get_openid_configuration()
-    response = requests.post(configuration['token_endpoint'], headers=headers, json=payload).json()
-    return response.get('access_token', None)
+    token_endpoint = configuration['token_endpoint']
+    logger.info(f'Requesting access token from token endpoint {token_endpoint}.')
+
+    try:
+        response = requests.post(token_endpoint, headers=headers, json=payload, timeout=HTTP_TIMEOUT_SECONDS)
+        logger.info(f'Token endpoint responded with status code {response.status_code}.')
+    except requests.exceptions.ConnectionError as error:
+        logger.error(f'Connection error requesting access token from {token_endpoint}. error={error}')
+        return None
+    except requests.exceptions.Timeout as error:
+        logger.error(f'Timeout requesting access token from {token_endpoint}. error={error}')
+        return None
+
+    if not response.ok:
+        logger.warning(
+            f'Token endpoint returned non-success status {response.status_code} from {token_endpoint}. '
+            f'body={response.text[:500]}'
+        )
+        return None
+
+    response_body = response.json()
+    access_token = response_body.get('access_token', None)
+    if not access_token:
+        logger.warning(f'Access token was not returned by token endpoint {token_endpoint}.')
+    return access_token
 
 
 def _get_openid_configuration():
@@ -228,7 +252,21 @@ def _get_openid_configuration():
     }
 
     url = urljoin(os.environ['ISSUER'], '/.well-known/openid-configuration')
-    return requests.get(url, headers=headers).json()
+    logger.info(f'Fetching OpenID configuration from {url}.')
+
+    try:
+        response = requests.get(url, headers=headers, timeout=HTTP_TIMEOUT_SECONDS)
+        logger.info(f'OpenID configuration endpoint responded with status code {response.status_code}.')
+        response.raise_for_status()
+    except requests.exceptions.RequestException as error:
+        status_code, body_snippet = _get_http_error_details(error)
+        logger.error(
+            f'Failed to fetch OpenID configuration from {url}. '
+            f'status={status_code}; body={body_snippet}; error={error}'
+        )
+        raise
+
+    return response.json()
 
 
 def _set_client_secret(secret_dict, access_token):
@@ -249,8 +287,19 @@ def _set_client_secret(secret_dict, access_token):
     }
 
     url = CLIENT_REGISTRY_TEMPLATE.expand(client_id=secret_dict[ID_KEY])
-    response = requests.post(url, headers=headers, json=payload)
-    response.raise_for_status()
+    logger.info(f'Setting client secret via Client Registry URL {url}.')
+
+    try:
+        response = requests.post(url, headers=headers, json=payload, timeout=HTTP_TIMEOUT_SECONDS)
+        logger.info(f'Client Registry responded with status code {response.status_code} for URL {url}.')
+        response.raise_for_status()
+    except requests.exceptions.RequestException as error:
+        status_code, body_snippet = _get_http_error_details(error)
+        logger.error(
+            f'Failed to set client secret via {url}. '
+            f'status={status_code}; body={body_snippet}; error={error}'
+        )
+        raise
 
 
 def _parse_iso_day_duration(duration_str):
@@ -259,6 +308,19 @@ def _parse_iso_day_duration(duration_str):
     if not match:
         raise ValueError(f'Unsupported ISO duration format: {duration_str}. Expected P<n>D.')
     return timedelta(days=int(match.group(1)))
+
+
+def _get_http_error_details(error):
+    response = getattr(error, 'response', None)
+    if response is None:
+        return 'n/a', 'n/a'
+
+    response_text = response.text or ''
+    max_length = 500
+    if len(response_text) > max_length:
+        response_text = f'{response_text[:max_length]}...'
+
+    return response.status_code, response_text
 
 
 def _get_secret_dict(arn, stage, token=None):

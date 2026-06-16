@@ -274,7 +274,7 @@ def _set_client_secret(secret_dict, access_token):
 
     This helper function sets the client secret
     """
-    overlap_duration = _parse_iso_day_duration(os.environ['OVERLAP_DURATION'])
+    overlap_duration = _parse_iso_day_duration(os.environ.get('OVERLAP_DURATION', 'P1D'))
     expire_previous_secrets_at = datetime.now(UTC) + overlap_duration
     payload = {
         'client_secret': secret_dict[SECRET_KEY],
@@ -307,7 +307,10 @@ def _parse_iso_day_duration(duration_str):
     match = re.fullmatch(r'P(\d+)D', duration_str)
     if not match:
         raise ValueError(f'Unsupported ISO duration format: {duration_str}. Expected P<n>D.')
-    return timedelta(days=int(match.group(1)))
+    duration = timedelta(days=int(match.group(1)))
+    if duration > timedelta(days=1):
+        raise ValueError(f'OVERLAP_DURATION {duration_str} exceeds the maximum allowed value of P1D.')
+    return duration
 
 
 def _get_http_error_details(error):

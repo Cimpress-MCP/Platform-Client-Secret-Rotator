@@ -64,6 +64,7 @@ Parameters:
       The amount of time after rotation for which a previous client secret will be active.
       This value should be taken into account when determining rotation cadence, as it
       could keep a client secret active longer than is compliant.
+      Cannot be longer than 1 day (P1D).
     Default: P1D
     AllowedPattern: ^P\d+D$
     ConstraintDescription: Must be a valid positive ISO duration. (P1D, PT8H, PT1H30M, etc.)

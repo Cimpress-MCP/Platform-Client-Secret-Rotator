@@ -1,3 +1,7 @@
+## Version 2.3.3 (Released 2026-06-16)
+
+- `OVERLAP_DURATION` defaults to `P1D` and is rejected if it exceeds `P1D`.
+
 ## Version 2.3.2 (Released 2026-06-15)
 
 - Added outbound HTTP logging for rotation calls and enforced mixed-character random password generation.
